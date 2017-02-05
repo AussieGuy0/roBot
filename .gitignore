@@ -37,4 +37,4 @@ jspm_packages
 .node_repl_history
 
 # Let's not push api key to public
-./resources/credentials/*
+/resources/credentials/*
