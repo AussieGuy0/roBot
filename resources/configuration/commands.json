@@ -1,0 +1,13 @@
+{
+    "commands": [
+    {
+        "command": "melbournememe",
+        "description": "Replies with a random meme from melbourne",
+        "function": "handleMelbourneMeme"
+    },
+    {
+        "command": "help",
+        "description": "Shows the command list",
+        "function": "showCommandList"
+    }]
+}
