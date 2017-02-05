@@ -1,6 +1,11 @@
-const fs = require('fs');
 const Discord = require("discord.js");
 const client = new Discord.Client();
+const fs = require('fs');
+
+const resourcesFolder = "resources/";
+const apiKeyFile = resourcesFolder + "credentials/apiKey.txt";
+
+const fileMap = new Map();
 
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.username}!`);
@@ -11,12 +16,25 @@ client.on('message', msg => {
     if (content.charAt(0) == "!") {
         let command = content.substr(1);
         if (command === "melbournememe") {
-            let arr = readFileIntoArray("resources/meme/melbourne.txt");
-            var rand = Math.floor(Math.random() * arr.length);
-            msg.reply(arr[rand]);
+            let line = getRandomLineFromFile(resourcesFolder + "meme/melbourne.txt");
+            msg.reply(line);
         }
     }
 });
+
+function getRandomLineFromFile(fileName) {
+    let arr;
+    if (fileMap.get(fileName) === undefined) {
+        console.log("Reading from file");
+        arr = readFileIntoArray(fileName);
+        fileMap.set(fileName, arr);
+    } else {
+        console.log("Reading from map");
+        arr = fileMap.get(fileName);
+    }
+    var rand = Math.floor(Math.random() * arr.length);
+    return arr[rand];
+}
 
 
 function readFileIntoArray(fileName) {
@@ -34,5 +52,8 @@ function readFileIntoArray(fileName) {
     return arr;
 }
 
-client.login('MjM5NzE1ODY3MDQxMDcxMTA1.C3dbsw.9N4Y4nDA6hcrzirCyzIj6xCXNF8');
-readFileIntoArray("resources/meme/melbourne.txt");
+function isNullOrUndefined(value) {
+    return value === null || value === undefined;
+}
+
+client.login(fs.readFileSync(apiKeyFile, "utf-8"));
