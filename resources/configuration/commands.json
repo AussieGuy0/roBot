@@ -1,6 +1,21 @@
 {
     "commands": [
     {
+        "command": "trivia",
+        "description": "Starts a new trivia game",
+        "function": "startTrivia"
+    },
+    {
+        "command": "scores",
+        "description": "Shows scores for running trivia game",
+        "function": "showTriviaScores"
+    },
+    {
+        "command": "triviaStop",
+        "description": "Stops the currently running trivia game",
+        "function": "stopTrivia"
+    },
+    {
         "command": "melbournememe",
         "description": "Replies with a random meme from melbourne",
         "function": "handleMelbourneMeme"

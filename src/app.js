@@ -2,6 +2,7 @@ const Discord = require("discord.js");
 const client = new Discord.Client();
 const fs = require('fs');
 const fileReader = require("./libs/fileReader.js");
+const trivia = require("./libs/trivia.js");
 
 const config = JSON.parse(fs.readFileSync("../resources/configuration/config.json"));
 const commandList = getCommandJSON();
@@ -9,7 +10,7 @@ const commandList = getCommandJSON();
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.username}!`);
     // console.log("CHANNELS")
-    // console.log(client.channels);
+    // client.channels.get("229173797184471040").sendMessage("++voice");
     // console.log("USERS");
     // console.log(client.users);
 });
@@ -24,6 +25,8 @@ client.on('message', msg => {
     if (msgPrefix == config.prefix) { 
         let command = content.substr(1);
         handleCommand(command, msg);
+    } else if (trivia.isRunning()) {
+        trivia.checkAnswer(msg);
     }
 });
 
@@ -96,5 +99,16 @@ function getCommandJSON() {
     return JSON.parse(fs.readFileSync(jsonFilePath, config.encoding));
 }
 
-client.login(fs.readFileSync(config.paths.apiKeyFile, config.encoding));
+function startTrivia(msg) {
+    trivia.startTrivia(msg);
+}
 
+function showTriviaScores(msg) {
+    trivia.showScores();
+}
+
+function stopTrivia() {
+    trivia.stopTrivia();
+}
+
+client.login(fs.readFileSync(config.paths.apiKeyFile, config.encoding));
