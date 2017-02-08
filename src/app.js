@@ -8,6 +8,7 @@ const config = JSON.parse(fs.readFileSync("../resources/configuration/config.jso
 const commandList = getCommandJSON();
 
 client.on('ready', () => {
+    client.user.setAvatar(config.paths.resources + "/images/avatars/2.png");
     console.log(`Logged in as ${client.user.username}!`);
     // console.log("CHANNELS")
     // client.channels.get("229173797184471040").sendMessage("++voice");
@@ -105,6 +106,17 @@ function startTrivia(msg) {
 
 function showTriviaScores(msg) {
     trivia.showScores();
+}
+
+function getPhotoshop(msg) {
+    let photoShopFolderPath = "../resources/images/photoshops/";
+    let photoShopFolderFiles = fs.readdirSync(photoShopFolderPath);
+    let randomNum = Math.floor(Math.random() * photoShopFolderFiles.length);
+
+    let photoPath = photoShopFolderPath + photoShopFolderFiles[randomNum];
+
+
+    msg.channel.sendFile(photoPath, "", "Here's your photoshop, " + msg.author.toString() + "!");
 }
 
 function stopTrivia() {

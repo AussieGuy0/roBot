@@ -16,6 +16,11 @@
         "function": "stopTrivia"
     },
     {
+        "command": "photoshop",
+        "description": "Replies with a random photoshop",
+        "function": "getPhotoshop"
+    },
+    {
         "command": "melbournememe",
         "description": "Replies with a random meme from melbourne",
         "function": "handleMelbourneMeme"
