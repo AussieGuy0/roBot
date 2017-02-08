@@ -1,5 +1,9 @@
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+const utils = require("./utils.js");
 let correctAnswerThreshold = 5;
+const timeOut = 30;
+
+let timeSinceQuestion = 0;
 
 let triviaChannel;
 let currentQuestion = "";
@@ -79,6 +83,7 @@ function getQuestionAndPost() {
         currentQuestion = response[0].question;
         currentAnswer = response[0].answer;
         triviaChannel.sendMessage(currentQuestion);
+        triviaChannel.sendMessage("HINT: " + showHint());
     });
 
 }
@@ -94,6 +99,23 @@ function makeApiRequest(url, callback) {
     xmlHttp.setRequestHeader("Api-User-Agent", "Personal/1.0");
     xmlHttp.send(null);
 }
+
+function showHint() {
+    let hintArr = utils.generateArray(currentAnswer.length, "_");
+    let numberOfHintChars = Math.floor(currentAnswer.length/2);
+    let randomNumbers = utils.generateUniqueNumbers(0, currentAnswer.length - 1, numberOfHintChars);
+
+    for (let i = 0; i < randomNumbers.length; i++) {
+        let randomNumber = randomNumbers[i];
+        hintArr[randomNumber] = currentAnswer.charAt(randomNumber);
+    }
+
+    let hint = "`";
+    hintArr.forEach((value, index, array) => hint += value + " ");
+    hint += "`";
+    return hint;
+}
+
 
 function reset() {
     running = false;
