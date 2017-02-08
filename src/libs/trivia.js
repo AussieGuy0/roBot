@@ -1,9 +1,10 @@
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const utils = require("./utils.js");
 let correctAnswerThreshold = 5;
-const timeOut = 30;
+const questionTimeOut = 40;
 
 let timeSinceQuestion = 0;
+let timer;
 
 let triviaChannel;
 let currentQuestion = "";
@@ -31,7 +32,8 @@ this.stopTrivia = function() {
 }
 
 this.checkAnswer = function(msg) {
-    if (msg.content.toLowerCase() === currentAnswer.toLowerCase()) { 
+    if (msg.channel === triviaChannel && msg.content.toLowerCase() === currentAnswer.toLowerCase()) { 
+        resetTimer();
         triviaChannel.sendMessage("Correct!");
         if (addPoint(msg.author) >= correctAnswerThreshold) {
             triviaChannel.sendMessage(msg.author.username + " is the winner!");
@@ -84,6 +86,15 @@ function getQuestionAndPost() {
         currentAnswer = response[0].answer;
         triviaChannel.sendMessage(currentQuestion);
         triviaChannel.sendMessage("HINT: " + showHint());
+        timer = setInterval(() => {
+            timeSinceQuestion++;
+            if (timeSinceQuestion >= questionTimeOut) {
+                resetTimer();
+                triviaChannel.sendMessage("Time's up!");
+                triviaChannel.sendMessage("The correct answer was: " + currentAnswer);
+                getQuestionAndPost();
+            }
+        }, 1000);
     });
 
 }
@@ -116,10 +127,16 @@ function showHint() {
     return hint;
 }
 
+function resetTimer() {
+    timeSinceQuestion = 0;
+    clearInterval(timer);
+}
+
 
 function reset() {
     running = false;
     scores = new Map();
     currentAnswer = "";
     currentQuestion = "";
+    resetTimer();
 }
