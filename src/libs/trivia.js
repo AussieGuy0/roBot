@@ -116,6 +116,12 @@ function showHint() {
     let numberOfHintChars = Math.floor(currentAnswer.length/2);
     let randomNumbers = utils.generateUniqueNumbers(0, currentAnswer.length - 1, numberOfHintChars);
 
+    for (let i = 0; i < hintArr.length; i++) {
+        if (currentAnswer.charAt(i) === " ") {
+            hintArr[i] = " ";
+        }
+    }
+
     for (let i = 0; i < randomNumbers.length; i++) {
         let randomNumber = randomNumbers[i];
         hintArr[randomNumber] = currentAnswer.charAt(randomNumber);

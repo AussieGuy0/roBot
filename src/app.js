@@ -123,4 +123,27 @@ function stopTrivia() {
     trivia.stopTrivia();
 }
 
+function showMoney(msg) {
+    let dataStore =  config.paths.resources + "/datastore/users.json";
+    let userId = msg.author.id;
+    let usersJson = JSON.parse(fs.readFileSync(dataStore));
+    let usersArr = usersJson.users;
+
+    let foundUser = usersArr.find((value, index, obj) => {
+      return (value.id === userId);
+    });
+
+    if (foundUser !== undefined) {
+        msg.reply("$" + foundUser.money);
+    } else {
+        console.log(`User with id ${userId} not found in datastore. Creating new entry`);
+        usersArr.push({
+            id: userId,
+            money: 0
+        });
+        fs.writeFile(dataStore, JSON.stringify(usersJson, null, 2));
+        msg.reply("$0");
+    }
+}
+
 client.login(fs.readFileSync(config.paths.apiKeyFile, config.encoding));
