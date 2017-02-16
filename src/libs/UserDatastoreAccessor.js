@@ -1,5 +1,8 @@
 const fs = require('fs');
 
+/**
+ * Class that reads and writes to a JSON file.
+ */
 class UserDatastoreAccessor {
     constructor(datastore) {
         this.dataStore = datastore;
