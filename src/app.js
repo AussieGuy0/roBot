@@ -1,14 +1,17 @@
+const fs = require('fs');
+const config = JSON.parse(fs.readFileSync("../resources/configuration/config.json"));
+
 const Discord = require("discord.js");
 const client = new Discord.Client();
-const fs = require('fs');
-const fileReader = require("./libs/fileReader.js");
-const trivia = require("./libs/trivia.js");
+const fileReader = require(config.paths.libs + "fileReader.js");
+const trivia = require(config.paths.libs + "trivia.js");
+const UserDatastoreAccessor = require(config.paths.libs + "UserDatastoreAccessor.js")
 
-const config = JSON.parse(fs.readFileSync("../resources/configuration/config.json"));
 const commandList = getCommandJSON();
+const datastoreAccessor = new UserDatastoreAccessor(config.paths.resources + "/datastore/users.json");
 
 client.on('ready', () => {
-    client.user.setAvatar(config.paths.resources + "/images/avatars/2.png");
+    client.user.setAvatar(config.paths.images + "avatars/2.png");
     console.log(`Logged in as ${client.user.username}!`);
     // console.log("CHANNELS")
     // client.channels.get("229173797184471040").sendMessage("++voice");
@@ -109,7 +112,7 @@ function showTriviaScores(msg) {
 }
 
 function getPhotoshop(msg) {
-    let photoShopFolderPath = "../resources/images/photoshops/";
+    let photoShopFolderPath =  config.paths.images + "photoshops/";
     let photoShopFolderFiles = fs.readdirSync(photoShopFolderPath);
     let randomNum = Math.floor(Math.random() * photoShopFolderFiles.length);
 
@@ -123,27 +126,11 @@ function stopTrivia() {
     trivia.stopTrivia();
 }
 
+
+
 function showMoney(msg) {
-    let dataStore =  config.paths.resources + "/datastore/users.json";
-    let userId = msg.author.id;
-    let usersJson = JSON.parse(fs.readFileSync(dataStore));
-    let usersArr = usersJson.users;
-
-    let foundUser = usersArr.find((value, index, obj) => {
-      return (value.id === userId);
-    });
-
-    if (foundUser !== undefined) {
-        msg.reply("$" + foundUser.money);
-    } else {
-        console.log(`User with id ${userId} not found in datastore. Creating new entry`);
-        usersArr.push({
-            id: userId,
-            money: 0
-        });
-        fs.writeFile(dataStore, JSON.stringify(usersJson, null, 2));
-        msg.reply("$0");
-    }
+    let money = datastoreAccessor.getMoneyOfUser(msg.author.id);
+    msg.reply("$" + money);
 }
 
 client.login(fs.readFileSync(config.paths.apiKeyFile, config.encoding));

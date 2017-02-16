@@ -1,5 +1,7 @@
 var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
 const utils = require("./utils.js");
+const fs = require("fs");
+const insideQuestions = JSON.parse(fs.readFileSync("../resources/questions.json")).questions;
 let correctAnswerThreshold = 5;
 const questionTimeOut = 40;
 
@@ -24,19 +26,20 @@ this.startTrivia = function (msg) {
     }
 };
 
-this.stopTrivia = function() {
+this.stopTrivia = function () {
     if (running) {
         triviaChannel.sendMessage("Triva game stopped");
         reset();
     }
 }
 
-this.checkAnswer = function(msg) {
-    if (msg.channel === triviaChannel && msg.content.toLowerCase() === currentAnswer.toLowerCase()) { 
+this.checkAnswer = function (msg) {
+    if (msg.channel === triviaChannel && msg.content.toLowerCase() === currentAnswer.toLowerCase()) {
         resetTimer();
-        triviaChannel.sendMessage("Correct!");
+        triviaChannel.sendMessage(msg.author.toString() + " is Correct!");
         if (addPoint(msg.author) >= correctAnswerThreshold) {
             triviaChannel.sendMessage(msg.author.username + " is the winner!");
+            this.showScores();
             this.stopTrivia();
         } else {
             getQuestionAndPost();
@@ -44,11 +47,11 @@ this.checkAnswer = function(msg) {
     }
 };
 
-this.isRunning = function() {
+this.isRunning = function () {
     return running;
 }
 
-this.showScores = function() {
+this.showScores = function () {
     if (running) {
         let arr = [];
         scores.forEach((value, key, map) => {
@@ -79,23 +82,39 @@ function addPoint(author) {
     }
 }
 
+let last;
+
 function getQuestionAndPost() {
-    makeApiRequest("http://jservice.io/api/random", response => {
-        console.log(response);
-        currentQuestion = response[0].question;
-        currentAnswer = response[0].answer;
-        triviaChannel.sendMessage(currentQuestion);
-        triviaChannel.sendMessage("HINT: " + showHint());
-        timer = setInterval(() => {
-            timeSinceQuestion++;
-            if (timeSinceQuestion >= questionTimeOut) {
-                resetTimer();
-                triviaChannel.sendMessage("Time's up!");
-                triviaChannel.sendMessage("The correct answer was: " + currentAnswer);
-                getQuestionAndPost();
-            }
-        }, 1000);
-    });
+    if (Math.random() <= 0.5) {
+        let rand;
+        do {
+            rand = Math.floor(Math.random() * insideQuestions.length);
+        } while (rand === last);
+        postQuestion(insideQuestions[rand]);
+        last = rand;
+    } else {
+        makeApiRequest("http://jservice.io/api/random", postQuestion);
+    }
+}
+
+function postQuestion(response) {
+    console.log(response);
+    if (isArray(response)) {
+        response = response[0];
+    }
+    currentQuestion = response.question;
+    currentAnswer = response.answer;
+    triviaChannel.sendMessage(currentQuestion);
+    triviaChannel.sendMessage("HINT: " + showHint());
+    timer = setInterval(() => {
+        timeSinceQuestion++;
+        if (timeSinceQuestion >= questionTimeOut) {
+            resetTimer();
+            triviaChannel.sendMessage("Time's up!");
+            triviaChannel.sendMessage("The correct answer was: " + currentAnswer);
+            getQuestionAndPost();
+        }
+    }, 1000);
 
 }
 
@@ -113,7 +132,7 @@ function makeApiRequest(url, callback) {
 
 function showHint() {
     let hintArr = utils.generateArray(currentAnswer.length, "_");
-    let numberOfHintChars = Math.floor(currentAnswer.length/2);
+    let numberOfHintChars = Math.floor(currentAnswer.length / 2);
     let randomNumbers = utils.generateUniqueNumbers(0, currentAnswer.length - 1, numberOfHintChars);
 
     for (let i = 0; i < hintArr.length; i++) {
@@ -145,4 +164,8 @@ function reset() {
     currentAnswer = "";
     currentQuestion = "";
     resetTimer();
+}
+
+function isArray(json) {
+    return Object.prototype.toString.call(json) === '[object Array]';
 }

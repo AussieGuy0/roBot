@@ -4,7 +4,9 @@
     "paths": {
         "resources": "../resources",
         "meme": "../resources/meme",
+        "images": "../resources/images/",
         "apiKeyFile": "../resources/credentials/apiKey.txt",
-        "commandList": "../resources/configuration/commands.json"
+        "commandList": "../resources/configuration/commands.json",
+        "libs": "./libs/"
     }
 }
