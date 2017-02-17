@@ -27,7 +27,13 @@ client.on('message', msg => {
     let content = msg.content;
     let msgPrefix = content.charAt(0);
     if (msgPrefix == config.prefix) { 
-        let command = content.substr(1);
+        let command;
+        let spaceIndex = content.indexOf(" ");
+        if (spaceIndex => 0) {
+            command = content.substr(1, spaceIndex - 1);
+        } else {
+            command = content.substr(1);
+        }
         handleCommand(command, msg);
     } else if (trivia.isRunning()) {
         trivia.checkAnswer(msg);
@@ -131,6 +137,16 @@ function stopTrivia() {
 function showMoney(msg) {
     let money = datastoreAccessor.getMoneyOfUser(msg.author.id);
     msg.reply("$" + money);
+}
+
+function betRoll(msg) {
+    let money = datastoreAccessor.getMoneyOfUser(msg.author.id);
+    if (money <= 0) {
+        msg.reply("Can't betRoll with no money, you goober!");
+    } else {
+        let rand = Math.floor(Math.random() * 99 + 1);
+        msg.reply("Rolled a: " + rand);
+    }
 }
 
 client.login(fs.readFileSync(config.paths.apiKeyFile, config.encoding));

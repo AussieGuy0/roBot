@@ -28,7 +28,18 @@
     {
         "command": "money",
         "description": "Shows how much money you have",
-        "function": "showMoney"
+        "function": "showMoney",
+        "parameters": [
+            {
+                "type": "Integer",
+                "ignoreSpaces": false
+            }
+        ]
+    },
+    {
+        "command": "betRoll",
+        "description": "Bet some of your money and roll a die. If the die is 80 or higher, win money!",
+        "function": "betRoll"
     },
     {
         "command": "help",

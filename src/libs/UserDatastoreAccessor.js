@@ -18,7 +18,6 @@ class UserDatastoreAccessor {
 
         if (foundUser !== undefined) {
             return foundUser.money;
-            msg.reply("$" + foundUser.money);
         } else {
             console.log(`User with id ${userId} not found in datastore. Creating new entry`);
             usersArr.push({
@@ -26,7 +25,7 @@ class UserDatastoreAccessor {
                 money: 0
             });
             fs.writeFile(this.dataStore, JSON.stringify(this.usersJson, null, 2));
-            msg.reply("$0");
+            return 0;
         }
     }
 

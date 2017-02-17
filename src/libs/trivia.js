@@ -85,7 +85,7 @@ function addPoint(author) {
 let last;
 
 function getQuestionAndPost() {
-    if (Math.random() <= 0.5) {
+    if (Math.random() <= 0.1) {
         let rand;
         do {
             rand = Math.floor(Math.random() * insideQuestions.length);
