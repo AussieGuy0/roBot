@@ -38,3 +38,7 @@ jspm_packages
 
 # Let's not push api key to public
 /resources/credentials/*
+
+/resources/images/photoshops
+/resources/questions.json
+*.iml
