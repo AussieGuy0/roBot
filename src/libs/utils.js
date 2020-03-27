@@ -46,3 +46,5 @@ this.generateArray = function(count, char) {
     }
     return out;
 };
+
+module.exports = this;

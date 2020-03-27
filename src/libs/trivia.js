@@ -1,7 +1,8 @@
-var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
+const fetch = require('node-fetch')
 const utils = require("./utils.js");
 const fs = require("fs");
-const insideQuestions = JSON.parse(fs.readFileSync("../resources/questions.json")).questions;
+// const insideQuestions = JSON.parse(fs.readFileSync("../resources/questions.json")).questions;
+const insideQuestions = [];
 let correctAnswerThreshold = 5;
 const questionTimeOut = 40;
 
@@ -19,7 +20,7 @@ this.startTrivia = function (msg) {
     if (!running) {
         running = true;
         triviaChannel = msg.channel;
-        triviaChannel.sendMessage("Trivia game started");
+        triviaChannel.send("Trivia game started");
         getQuestionAndPost();
     } else {
         msg.reply("A trivia game is already in progress!");
@@ -28,7 +29,7 @@ this.startTrivia = function (msg) {
 
 this.stopTrivia = function () {
     if (running) {
-        triviaChannel.sendMessage("Triva game stopped");
+        triviaChannel.send("Triva game stopped");
         reset();
     }
 }
@@ -36,9 +37,9 @@ this.stopTrivia = function () {
 this.checkAnswer = function (msg) {
     if (msg.channel === triviaChannel && msg.content.toLowerCase() === currentAnswer.toLowerCase()) {
         resetTimer();
-        triviaChannel.sendMessage(msg.author.toString() + " is Correct!");
+        triviaChannel.send(msg.author.toString() + " is Correct!");
         if (addPoint(msg.author) >= correctAnswerThreshold) {
-            triviaChannel.sendMessage(msg.author.username + " is the winner!");
+            triviaChannel.send(msg.author.username + " is the winner!");
             this.showScores();
             this.stopTrivia();
         } else {
@@ -67,7 +68,7 @@ this.showScores = function () {
             let score = arr[i][1];
             scoreBoard += "\n" + name + ": " + score;
         }
-        triviaChannel.sendMessage(scoreBoard);
+        triviaChannel.send(scoreBoard);
     }
 };
 
@@ -97,42 +98,37 @@ function getQuestionAndPost() {
     }
 }
 
+function makeApiRequest(url, callback) {
+    fetch(url)
+        .then(r => r.json())
+        .then(callback)
+}
+
 function postQuestion(response) {
     console.log(response);
     if (isArray(response)) {
         response = response[0];
     }
+    const title = response.category.title;
     currentQuestion = response.question;
     currentAnswer = response.answer;
-    triviaChannel.sendMessage(currentQuestion);
-    triviaChannel.sendMessage("HINT: " + showHint());
+    triviaChannel.send(`${title}: ${currentQuestion}`);
+    triviaChannel.send("HINT: " + showHint());
     timer = setInterval(() => {
         timeSinceQuestion++;
         if (timeSinceQuestion >= questionTimeOut) {
             resetTimer();
-            triviaChannel.sendMessage("Time's up!");
-            triviaChannel.sendMessage("The correct answer was: " + currentAnswer);
+            triviaChannel.send("Time's up!");
+            triviaChannel.send("The correct answer was: " + currentAnswer);
             getQuestionAndPost();
         }
     }, 1000);
 
 }
 
-function makeApiRequest(url, callback) {
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange = function () {
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-            callback(JSON.parse(xmlHttp.responseText));
-        }
-    };
-    xmlHttp.open("GET", url, true);
-    xmlHttp.setRequestHeader("Api-User-Agent", "Personal/1.0");
-    xmlHttp.send(null);
-}
-
 function showHint() {
     let hintArr = utils.generateArray(currentAnswer.length, "_");
-    let numberOfHintChars = Math.floor(currentAnswer.length / 2);
+    let numberOfHintChars = Math.floor(currentAnswer.length / 1.5);
     let randomNumbers = utils.generateUniqueNumbers(0, currentAnswer.length - 1, numberOfHintChars);
 
     for (let i = 0; i < hintArr.length; i++) {

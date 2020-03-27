@@ -1,22 +1,17 @@
 const fs = require('fs');
-const config = JSON.parse(fs.readFileSync("../resources/configuration/config.json"));
+const config = JSON.parse(fs.readFileSync("./resources/configuration/config.json").toString());
 
 const Discord = require("discord.js");
 const client = new Discord.Client();
-const fileReader = require(config.paths.libs + "fileReader.js");
-const trivia = require(config.paths.libs + "trivia.js");
-const UserDatastoreAccessor = require(config.paths.libs + "UserDatastoreAccessor.js")
+const fileReader = require("./libs/fileReader.js");
+const trivia = require("./libs/trivia.js");
+const UserDatastoreAccessor = require("./libs/UserDatastoreAccessor.js")
 
 const commandList = getCommandJSON();
 const datastoreAccessor = new UserDatastoreAccessor(config.paths.resources + "/datastore/users.json");
 
 client.on('ready', () => {
-    client.user.setAvatar(config.paths.images + "avatars/2.png");
     console.log(`Logged in as ${client.user.username}!`);
-    // console.log("CHANNELS")
-    // client.channels.get("229173797184471040").sendMessage("++voice");
-    // console.log("USERS");
-    // console.log(client.users);
 });
 
 /**
@@ -24,16 +19,11 @@ client.on('ready', () => {
  * the prefix key (default '!').
  */
 client.on('message', msg => {
-    let content = msg.content;
-    let msgPrefix = content.charAt(0);
+    const content = msg.content;
+    const msgPrefix = content.charAt(0);
     if (msgPrefix == config.prefix) { 
-        let command;
-        let spaceIndex = content.indexOf(" ");
-        if (spaceIndex => 0) {
-            command = content.substr(1, spaceIndex - 1);
-        } else {
-            command = content.substr(1);
-        }
+        const command = content.substr(1, content.length);
+        console.log(command)
         handleCommand(command, msg);
     } else if (trivia.isRunning()) {
         trivia.checkAnswer(msg);
@@ -64,6 +54,7 @@ function handleCommand(input, msg) {
  * @param commandName The name of the command to find 
  */
 function findCommand(commandName) {
+    console.log(commandName)
     for (let i = 0; i < commandList.commands.length; i++) {
         let currentCommand = commandList.commands[i];
         if (currentCommand.command === commandName) {
@@ -106,7 +97,7 @@ function createCommandList() {
  */
 function getCommandJSON() {
     let jsonFilePath = config.paths.commandList; 
-    return JSON.parse(fs.readFileSync(jsonFilePath, config.encoding));
+    return JSON.parse(fs.readFileSync(jsonFilePath, config.encoding).toString());
 }
 
 function startTrivia(msg) {
@@ -149,4 +140,5 @@ function betRoll(msg) {
     }
 }
 
-client.login(fs.readFileSync(config.paths.apiKeyFile, config.encoding));
+const apiKey = fs.readFileSync(config.paths.apiKeyFile, config.encoding).toString()
+client.login(apiKey);

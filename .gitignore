@@ -36,6 +36,11 @@ jspm_packages
 # Optional REPL history
 .node_repl_history
 
+# Typscript
+build
+*.tsbuildinfo
+
+
 # Let's not push api key to public
 /resources/credentials/*
 

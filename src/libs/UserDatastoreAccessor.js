@@ -6,7 +6,7 @@ const fs = require('fs');
 class UserDatastoreAccessor {
     constructor(datastore) {
         this.dataStore = datastore;
-        this.usersJson = JSON.parse(fs.readFileSync(datastore))
+        this.usersJson = JSON.parse(fs.readFileSync(datastore).toString())
     }
 
     getMoneyOfUser(userId) {
@@ -24,7 +24,7 @@ class UserDatastoreAccessor {
                 id: userId,
                 money: 0
             });
-            fs.writeFile(this.dataStore, JSON.stringify(this.usersJson, null, 2));
+            fs.writeFile(this.dataStore, JSON.stringify(this.usersJson, null, 2), () => {});
             return 0;
         }
     }
