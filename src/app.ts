@@ -1,24 +1,31 @@
-const fs = require('fs');
+import fs from 'fs'
+import Discord from 'discord.js'
+import {getRandomLineFromFile} from './libs/fileReader'
+import * as trivia from "./libs/trivia.js"
+import {UserDatastoreAccessor} from "./libs/UserDatastoreAccessor.js"
+
 const config = JSON.parse(fs.readFileSync("./resources/configuration/config.json").toString());
 
-const Discord = require("discord.js");
-const client = new Discord.Client();
-const fileReader = require("./libs/fileReader.js");
-const trivia = require("./libs/trivia.js");
-const UserDatastoreAccessor = require("./libs/UserDatastoreAccessor.js")
 
 const commandList = getCommandJSON();
 const datastoreAccessor = new UserDatastoreAccessor(config.paths.resources + "/datastore/users.json");
 
+const client = new Discord.Client();
+
 client.on('ready', () => {
-    console.log(`Logged in as ${client.user.username}!`);
+    console.log(`Logged in as ${client.user?.username}!`);
 });
 
 /**
  * Reads every message and handles commands if message starts with 
  * the prefix key (default '!').
  */
-client.on('message', msg => {
+client.on('message', rawMsg => {
+    if (rawMsg.partial) {
+        // we shouldn't receive partial messages, but check and throw them away just in case
+        return
+    }
+    const msg: Discord.Message = <Discord.Message> rawMsg
     const content = msg.content;
     const msgPrefix = content.charAt(0);
     if (msgPrefix == config.prefix) { 
@@ -37,9 +44,10 @@ client.on('message', msg => {
  * @param input The command the user specified
  * @param msg The message object where the user inserted the command
  */
-function handleCommand(input, msg) {
+function handleCommand(input: string, msg: Discord.Message): void {
     let selectedCommand = findCommand(input);
     if (selectedCommand !== null) {
+        //TODO: Wow, I regret this...
         eval(selectedCommand.function + "(msg)"); //runs function 
     } else {
         msg.reply("Command not found. Type '!help' to see full command list");
@@ -53,7 +61,7 @@ function handleCommand(input, msg) {
  * 
  * @param commandName The name of the command to find 
  */
-function findCommand(commandName) {
+function findCommand(commandName: string): any | null {
     console.log(commandName)
     for (let i = 0; i < commandList.commands.length; i++) {
         let currentCommand = commandList.commands[i];
@@ -67,15 +75,15 @@ function findCommand(commandName) {
 /**
  * Replies to message with a random line from melbourne meme text file.
  */
-function handleMelbourneMeme(msg) {
-    let line = fileReader.getRandomLineFromFile(config.paths.meme + "/melbourne.txt");
+function handleMelbourneMeme(msg: Discord.Message): void {
+    let line = getRandomLineFromFile(config.paths.meme + "/melbourne.txt");
     msg.reply(line);
 }
 
 /**
  * Replies to message with a nicely formatted command list.
  */
-function showCommandList(msg) {
+function showCommandList(msg: Discord.Message): void {
     msg.reply(createCommandList());
 }
 
@@ -100,37 +108,39 @@ function getCommandJSON() {
     return JSON.parse(fs.readFileSync(jsonFilePath, config.encoding).toString());
 }
 
-function startTrivia(msg) {
+function startTrivia(msg: Discord.Message): void {
     trivia.startTrivia(msg);
 }
 
-function showTriviaScores(msg) {
+function showTriviaScores(msg: Discord.Message): void {
     trivia.showScores();
 }
 
-function getPhotoshop(msg) {
-    let photoShopFolderPath =  config.paths.images + "photoshops/";
-    let photoShopFolderFiles = fs.readdirSync(photoShopFolderPath);
-    let randomNum = Math.floor(Math.random() * photoShopFolderFiles.length);
+function getPhotoshop(msg: Discord.Message): void {
+    const photoShopFolderPath =  config.paths.images + "photoshops/";
+    const photoShopFolderFiles = fs.readdirSync(photoShopFolderPath);
+    const randomNum = Math.floor(Math.random() * photoShopFolderFiles.length);
 
-    let photoPath = photoShopFolderPath + photoShopFolderFiles[randomNum];
+    const photoPath = photoShopFolderPath + photoShopFolderFiles[randomNum];
 
-
-    msg.channel.sendFile(photoPath, "", "Here's your photoshop, " + msg.author.toString() + "!");
+    msg.channel.send(`Here's your photoshop, ${msg.author.toString}!`, {
+        files: [{
+            attachment: photoPath,
+            name: "example.jpg"
+        }]
+    })
 }
 
-function stopTrivia() {
-    trivia.stopTrivia();
+function stopTrivia(): void {
+    stopTrivia();
 }
 
-
-
-function showMoney(msg) {
+function showMoney(msg: Discord.Message): void {
     let money = datastoreAccessor.getMoneyOfUser(msg.author.id);
     msg.reply("$" + money);
 }
 
-function betRoll(msg) {
+function betRoll(msg: Discord.Message): void {
     let money = datastoreAccessor.getMoneyOfUser(msg.author.id);
     if (money <= 0) {
         msg.reply("Can't betRoll with no money, you goober!");

@@ -1,5 +1,5 @@
-const fs = require('fs');
-const fileMap = new Map();
+const fileMap = new Map<String, Array<String>>();
+import fs from 'fs'
 
 /**
  * Reads file into array where each element of array is a single
@@ -7,12 +7,11 @@ const fileMap = new Map();
  * 
  * @param fileName The path to the file
  */
-this.readFileIntoArray = function(fileName) {
+export function readFileIntoArray(fileName: string): Array<string> {
     console.log("Reading from file '" + fileName + "'");
-    let arr = [];
+    let arr: Array<string> = [];
     let data = fs.readFileSync(fileName, "utf-8");
 
-    let pointer = 0;
     let dataString = data;
     while (dataString.indexOf('\n') >= 0) {
         let index = dataString.indexOf("\n");
@@ -30,14 +29,15 @@ this.readFileIntoArray = function(fileName) {
  * 
  * @param fileName path to file
  */
-this.getRandomLineFromFile = function(fileName) {
-    let arr;
-    if (fileMap.get(fileName) === undefined) {
-        arr = this.readFileIntoArray(fileName);
-        fileMap.set(fileName, arr);
+export function getRandomLineFromFile(fileName: string): String {
+    let arr: Array<String>
+    let cached = fileMap.get(fileName)
+    if (cached != undefined) {
+        console.log("File '" + fileName + "' has already been read. Reading data from cache.")
+        arr = cached
     } else {
-        console.log("File '" + fileName + "' has already been read. Reading data from cache.");
-        arr = fileMap.get(fileName);
+        arr = readFileIntoArray(fileName);
+        fileMap.set(fileName, arr);
     }
     var rand = Math.floor(Math.random() * arr.length);
     return arr[rand];

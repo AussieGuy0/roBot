@@ -1,8 +1,8 @@
-this.isNullOrUndefined = function(value) {
+export function isNullOrUndefined(value: any): boolean {
     return value === null || value === undefined;
 }
 
-this.createString = function(char, length) {
+export function createString(char: string, length: number): string {
     let out = "";
     for (let i = 0; i < length; i++) {
        out +=  char; 
@@ -10,7 +10,7 @@ this.createString = function(char, length) {
     return out;
 }
 
-this.generateUniqueNumbers = function(min, max, count) {
+export function generateUniqueNumbers(min: number, max: number, count: number) {
     if (min > max) {
         console.error(`Could not generate numbers because min '${min}' is greater than max '${max}'`);
         return [];
@@ -39,12 +39,10 @@ this.generateUniqueNumbers = function(min, max, count) {
     return out;
 };
 
-this.generateArray = function(count, char) {
+export function generateArray(count: number, char: string) {
     let out = [];
     for (let i = 0; i < count; i++) {
         out.push(char);
     }
     return out;
 };
-
-module.exports = this;

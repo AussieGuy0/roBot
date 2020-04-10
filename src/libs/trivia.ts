@@ -1,22 +1,24 @@
-const fetch = require('node-fetch')
-const utils = require("./utils.js");
-const fs = require("fs");
+import fetch from 'node-fetch'
+import fs from 'fs'
+import Discord, { TextChannel, DMChannel, User } from 'discord.js'
+import { generateArray, generateUniqueNumbers } from './utils';
+
 // const insideQuestions = JSON.parse(fs.readFileSync("../resources/questions.json")).questions;
 const insideQuestions = [];
 let correctAnswerThreshold = 5;
 const questionTimeOut = 40;
 
 let timeSinceQuestion = 0;
-let timer;
+let timer: NodeJS.Timeout;
 
-let triviaChannel;
+let triviaChannel: TextChannel | DMChannel;
 let currentQuestion = "";
 let currentAnswer = "";
 let running = false;
 
 let scores = new Map();
 
-this.startTrivia = function (msg) {
+export function startTrivia(msg: Discord.Message): void {
     if (!running) {
         running = true;
         triviaChannel = msg.channel;
@@ -27,14 +29,14 @@ this.startTrivia = function (msg) {
     }
 };
 
-this.stopTrivia = function () {
+export function stopTrivia(): void {
     if (running) {
         triviaChannel.send("Triva game stopped");
         reset();
     }
 }
 
-this.checkAnswer = function (msg) {
+export function checkAnswer(msg: Discord.Message): void {
     if (msg.channel === triviaChannel && msg.content.toLowerCase() === currentAnswer.toLowerCase()) {
         resetTimer();
         triviaChannel.send(msg.author.toString() + " is Correct!");
@@ -48,11 +50,11 @@ this.checkAnswer = function (msg) {
     }
 };
 
-this.isRunning = function () {
+export function isRunning(): boolean {
     return running;
 }
 
-this.showScores = function () {
+export function showScores(): void {
     if (running) {
         let arr = [];
         scores.forEach((value, key, map) => {
@@ -72,7 +74,7 @@ this.showScores = function () {
     }
 };
 
-function addPoint(author) {
+function addPoint(author: User) {
     if (scores.get(author) === undefined) {
         scores.set(author, 1);
         return 1;
@@ -85,7 +87,7 @@ function addPoint(author) {
 
 let last;
 
-function getQuestionAndPost() {
+function getQuestionAndPost(): void {
     if (Math.random() <= 0.1) {
         let rand;
         do {
@@ -98,13 +100,13 @@ function getQuestionAndPost() {
     }
 }
 
-function makeApiRequest(url, callback) {
+function makeApiRequest(url: string, callback: Function): void {
     fetch(url)
         .then(r => r.json())
         .then(callback)
 }
 
-function postQuestion(response) {
+function postQuestion(response: any): void {
     console.log(response);
     if (isArray(response)) {
         response = response[0];
@@ -126,10 +128,10 @@ function postQuestion(response) {
 
 }
 
-function showHint() {
-    let hintArr = utils.generateArray(currentAnswer.length, "_");
-    let numberOfHintChars = Math.floor(currentAnswer.length / 1.5);
-    let randomNumbers = utils.generateUniqueNumbers(0, currentAnswer.length - 1, numberOfHintChars);
+function showHint(): string {
+    const hintArr = generateArray(currentAnswer.length, "_");
+    const numberOfHintChars = Math.floor(currentAnswer.length / 1.5);
+    const randomNumbers = generateUniqueNumbers(0, currentAnswer.length - 1, numberOfHintChars);
 
     for (let i = 0; i < hintArr.length; i++) {
         if (currentAnswer.charAt(i) === " ") {
@@ -148,13 +150,12 @@ function showHint() {
     return hint;
 }
 
-function resetTimer() {
+function resetTimer(): void {
     timeSinceQuestion = 0;
     clearInterval(timer);
 }
 
-
-function reset() {
+function reset(): void {
     running = false;
     scores = new Map();
     currentAnswer = "";
@@ -162,6 +163,6 @@ function reset() {
     resetTimer();
 }
 
-function isArray(json) {
+function isArray(json: any): boolean {
     return Object.prototype.toString.call(json) === '[object Array]';
 }

@@ -1,15 +1,25 @@
-const fs = require('fs');
+import fs from 'fs'
 
+interface User {
+    id: string,
+    money: number
+}
+
+interface UserStore {
+    users: Array<User>
+}
 /**
  * Class that reads and writes to a JSON file.
  */
-class UserDatastoreAccessor {
-    constructor(datastore) {
+export class UserDatastoreAccessor {
+    dataStore: string;
+    usersJson: UserStore; //TODO: Fix this
+    constructor(datastore: string) {
         this.dataStore = datastore;
         this.usersJson = JSON.parse(fs.readFileSync(datastore).toString())
     }
 
-    getMoneyOfUser(userId) {
+    getMoneyOfUser(userId: string) {
         let usersArr = this.usersJson.users;
 
         let foundUser = usersArr.find((value, index, obj) => {
@@ -28,11 +38,4 @@ class UserDatastoreAccessor {
             return 0;
         }
     }
-
 } 
-
-module.exports = UserDatastoreAccessor;
-    
-
-
-
