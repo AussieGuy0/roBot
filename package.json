@@ -7,7 +7,7 @@
     "@types/mocha": "^7.0.2",
     "@types/node": "^13.9.5",
     "discord.js": "^12.0.2",
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^3.1.1"
   },
   "devDependencies": {
     "mocha": "^3.5.0",
